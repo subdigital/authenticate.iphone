@@ -169,11 +169,11 @@
 @synthesize token;
 
 
-- (id)initWithBaseUrl:(NSString*)URL andDelegate:(id<JRSessionDelegate>)del
+- (id)initWithBaseUrl:(NSString*)_baseURL andDelegate:(id<JRSessionDelegate>)_delegate excludingProviders:(NSSet*)providers
 {
 	DLog(@"");
 	
-	if (URL == nil || URL.length == 0)
+	if (_baseURL == nil || _baseURL.length == 0)
 	{
 		[self release];
 		return nil;
@@ -181,8 +181,8 @@
 	
 	if (self = [super init]) 
 	{
-		delegate = [del retain];
-		baseURL = [[NSString stringWithString:URL] retain];
+		delegate = [_delegate retain];
+		baseURL = [[NSString stringWithString:_baseURL] retain];
 		
 		currentProvider = nil;
 		returningProvider = nil;
@@ -190,6 +190,8 @@
 		allProviders = nil;
 		providerInfo = nil;
 		configedProviders = nil;
+        
+        excludedProviders = [providers retain];
 	
 		errorStr = nil;
 		forceReauth = NO;
@@ -319,10 +321,25 @@
 	[request release];
 }
 
+- (NSArray*)configuredProvidersExcludingExcluded:(NSDictionary*)configuration
+{
+    NSMutableArray *providers = [NSMutableArray arrayWithArray:[configuration objectForKey:@"enabled_providers"]];
+    
+    for (int i = 0; i < [providers count]; i++)
+    {
+        NSString *provider = [providers objectAtIndex:i];
+        
+        if ([excludedProviders containsObject:provider])
+            [providers removeObjectAtIndex:i--];
+    }
+    
+    return providers;
+}
+
 - (void)finishGetConfiguredProviders:(NSString*)dataStr
 {
 	DLog(@"");
-	NSDictionary *jsonDict = [dataStr JSONValue];
+	NSDictionary *jsonDict = [[dataStr JSONValue] retain];
 	
 	if(!jsonDict)
 		return;
@@ -331,15 +348,14 @@
 //	providerInfo = [NSDictionary dictionaryWithDictionary:[jsonDict objectForKey:@"provider_info"]];
 	allProviders = [[NSDictionary dictionaryWithDictionary:[jsonDict objectForKey:@"provider_info"]] retain];
 	
-	configedProviders = [NSArray arrayWithArray:[jsonDict objectForKey:@"enabled_providers"]];
-	
+	configedProviders = [[self configuredProvidersExcludingExcluded:jsonDict] retain];
+    
 	if ([[jsonDict objectForKey:@"hide_tagline"] isEqualToString:@"YES"])
 		hidePoweredBy = YES;
 	else
 		hidePoweredBy = NO;
 	
-	if(configedProviders)
-		[configedProviders retain];
+    [jsonDict release];
 	
 	[self loadCookieData];
 }

@@ -76,7 +76,9 @@ static NSString *tokenUrl = @"http://jrauthenticate.appspot.com/login";
 	if (self = [super init])
 	{
 		/* Instantiate an instance of the JRAuthenticate library with your application ID and token URL */
-		jrAuthenticate = [[JRAuthenticate jrAuthenticateWithAppID:appId andTokenUrl:tokenUrl delegate:self] retain];
+		jrAuthenticate = [[JRAuthenticate jrAuthenticateWithAppID:appId 
+                                                      andTokenUrl:tokenUrl 
+                                                         delegate:self] retain];
 		
 		prefs = [[NSUserDefaults standardUserDefaults] retain];
 		
@@ -455,7 +457,7 @@ static NSString *tokenUrl = @"http://jrauthenticate.appspot.com/login";
 	signInDelegate = [interestedParty retain]; 
 
 	/* Launch the JRAuthenticate Library. */
-	[jrAuthenticate showJRAuthenticateDialog];	
+	[jrAuthenticate showJRAuthenticateDialog];
 }
 
 - (void)startSignUserIn:(id<DemoUserModelDelegate>)interestedPartySignIn afterSignOut:(id<DemoUserModelDelegate>)interestedPartySignOut

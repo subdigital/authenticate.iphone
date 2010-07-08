@@ -71,6 +71,7 @@ static JRAuthenticate* singletonJRAuth = nil;
 - (JRAuthenticate*)initWithAppID:(NSString*)appId 
 					 andTokenUrl:(NSString*)tokenUrl 
 						delegate:(id<JRAuthenticateDelegate>)delegate
+              excludingProviders:(NSSet*)exProvs
 {
 	DLog(@"appID:    %@", appId);
 	DLog(@"tokenURL: %@", tokenUrl);
@@ -84,6 +85,8 @@ static JRAuthenticate* singletonJRAuth = nil;
 		theAppId = [[NSString alloc] initWithString:appId];
 		theTokenUrl = (tokenUrl) ? [[NSString alloc] initWithString:tokenUrl] : nil;
 		
+        excludedProviders = [[NSSet setWithSet:exProvs] retain];
+        
 		[self startGetBaseUrl];
 	}	
 	
@@ -91,20 +94,46 @@ static JRAuthenticate* singletonJRAuth = nil;
 }
 
 
-
 + (JRAuthenticate*)jrAuthenticateWithAppID:(NSString*)appId 
 							   andTokenUrl:(NSString*)tokenUrl
-								  delegate:(id<JRAuthenticateDelegate>)delegate
+                                  delegate:(id<JRAuthenticateDelegate>)delegate
+                        excludingProviders:(NSString*)first, ...
 {
-	if(singletonJRAuth)
+    if(singletonJRAuth)
 		return singletonJRAuth;
 	
 	if (appId == nil)
 		return nil;
 	
+    NSString* nextString = first;
+    va_list ap;
+    va_start(ap,first);
+    
+    NSMutableSet *exProvs = nil;
+
+    if (nextString)
+        exProvs = [[[NSMutableSet alloc] initWithCapacity:1] autorelease];
+    
+    while(nextString)
+    {
+        [exProvs addObject:nextString];
+        nextString = va_arg(ap,id);
+    }
+    
+    va_end(ap);
+        
 	return [[super allocWithZone:nil] initWithAppID:appId 
 										andTokenUrl:tokenUrl 
-										   delegate:delegate];
+										   delegate:delegate
+                                 excludingProviders:exProvs];    
+}
+
+
++ (JRAuthenticate*)jrAuthenticateWithAppID:(NSString*)appId 
+							   andTokenUrl:(NSString*)tokenUrl
+								  delegate:(id<JRAuthenticateDelegate>)delegate
+{
+    return [JRAuthenticate jrAuthenticateWithAppID:appId andTokenUrl:tokenUrl delegate:delegate excludingProviders:nil];
 }	
 
 - (id)copyWithZone:(NSZone *)zone
@@ -152,7 +181,6 @@ static JRAuthenticate* singletonJRAuth = nil;
 	if (!theBaseUrl)
 		[self startGetBaseUrl];
 	
-	
 	if (!jrModalNavController)
 		jrModalNavController = [[JRModalNavigationController alloc] initWithSessionData:sessionData];
 	
@@ -160,7 +188,6 @@ static JRAuthenticate* singletonJRAuth = nil;
 	
 	[jrModalNavController presentModalNavigationController];
 }
-
 
 - (void)startGetBaseUrl
 {
@@ -212,7 +239,7 @@ static JRAuthenticate* singletonJRAuth = nil;
 	[theBaseUrl retain];
 	
 	if (!sessionData)
-		sessionData = [[JRSessionData alloc] initWithBaseUrl:theBaseUrl andDelegate:self];
+		sessionData = [[JRSessionData alloc] initWithBaseUrl:theBaseUrl andDelegate:self excludingProviders:excludedProviders];
 	
 	if (jrModalNavController)
 		jrModalNavController.sessionData = sessionData;

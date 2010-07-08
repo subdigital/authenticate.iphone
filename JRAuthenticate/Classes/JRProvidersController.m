@@ -121,7 +121,6 @@
 	[myTableView reloadData];
 }
 
-
 - (void)viewWillAppear:(BOOL)animated 
 {
 	DLog(@"");
@@ -295,7 +294,7 @@
 - (NSInteger)tableView:(UITableView *)tableView 
  numberOfRowsInSection:(NSInteger)section 
 {
-	return [sessionData.configedProviders count];
+	return [sessionData.configedProviders count];// - [sessionData.excludedProviders count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView 

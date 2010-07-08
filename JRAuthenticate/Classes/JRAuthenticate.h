@@ -102,7 +102,8 @@
 	NSString		*theTokenUrlPayload;
 	
 	JRSessionData	*sessionData;
-	
+	NSSet           *excludedProviders;
+    
 	NSString		*errorStr;
 }
 
@@ -143,17 +144,28 @@
 /**
  * Use this function to create an instance of the JRAuthenticate library.
  * Arguments:
- *       appID: This is your 20-character application ID.  It is required.
- *    tokenURL: This is url where the library will automatically POST the token.
- *		    	It is not required, but if you don't supply one, the library won't
- *              automatically POST the token.  You can manually post the token by 
- *              calling the makeCallToTokenUrl message described below.
- *    delegate: This is the class that implements the JRAuthenticateDelegate protocol.
+ *              appID: This is your 20-character application ID.  It is required.
+ *           tokenURL: This is url where the library will automatically POST the token.
+ *		    	       It is not required, but if you don't supply one, the library won't
+ *                     automatically POST the token.  You can manually post the token by 
+ *                     calling the makeCallToTokenUrl message described below.
+ *           delegate: This is the class that implements the JRAuthenticateDelegate protocol.
+ * excludingProviders: If you wish to exclude any providers from your mobile authentication
+ *                     widget (e.g., the provider isn't formatted well for the mobile screen), 
+ *                     specify the providers' names in the excludingProviders list, 
+ *                     followed by nil.  Provider names can only be one of the following:
+ *                     @"hyves",  @"netlog",  @"aol",  @"linkedin",  @"openid",  @"blogger",   
+ *                     @"twitter",  @"facebook",  @"livejournal",  @"verisign",  @"flickr", 
+ *                     @"wordpress",  @"google",  @"myspace",  @"yahoo",  @"live_id", or @"myopenid" 
  */
 + (JRAuthenticate*)jrAuthenticateWithAppID:(NSString*)appId 
 							   andTokenUrl:(NSString*)tokenUrl
 								  delegate:(id<JRAuthenticateDelegate>)delegate;
 
++ (JRAuthenticate*)jrAuthenticateWithAppID:(NSString*)appId 
+							   andTokenUrl:(NSString*)tokenUrl
+                                  delegate:(id<JRAuthenticateDelegate>)delegate
+                        excludingProviders:(NSString*)first, ...;
 
 /**
  * Use this function to begin authentication.  The JRAuthenticate library will 

@@ -80,6 +80,7 @@
 	NSDictionary	*allProviders;
 	NSDictionary	*providerInfo;
 	NSArray			*configedProviders;
+    NSSet           *excludedProviders;
 	
 	BOOL hidePoweredBy;
 	
@@ -107,7 +108,7 @@
 
 @property (readonly) NSString* token;
 
-- (id)initWithBaseUrl:(NSString*)URL andDelegate:(id<JRSessionDelegate>)del;
+- (id)initWithBaseUrl:(NSString*)_baseURL andDelegate:(id<JRSessionDelegate>)_delegate excludingProviders:(NSSet*)providers;
 - (void)setReturningProviderToProvider:(JRProvider*)provider;
 - (void)setProvider:(NSString *)prov;
 - (void)setCurrentProviderToReturningProvider;
